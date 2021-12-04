@@ -1,5 +1,6 @@
 (ns advent-of-code-2021.day03
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [advent-of-code-2021.util :as util]))
 
 
 (defn string->bits [line]
@@ -15,17 +16,13 @@
   (let [{zero 0 one 1} (frequencies bits)]
     (if (<= zero one) 0 1)))
 
-(defn transpose [l]
-  (apply map list l))
-
-
 (defn complement-bits [l]
   (map #(if (= % 1) 0 1) l))
 
 (defn get-gamma [content]
   (->> content
        (map string->bits)
-       transpose
+       util/transpose
        (map most-common-bit)))
 
 (defn compute-result [content]
@@ -36,7 +33,7 @@
                 (Integer/parseInt (str/join epsilon) 2)))))
 
 (defn filter-discriminant [bits pos discrimant]
-  (let [tr (transpose bits)
+  (let [tr (util/transpose bits)
         reference (nth tr pos) ;; find the row at pos in the transposed list
         ref-bit (discrimant reference)] ;; in that row find bit with discrimant function
     (filter #(= ref-bit (nth % pos)) bits))) ;; filter entries that have that bit in position pos
