@@ -1,9 +1,6 @@
 (ns advent-of-code-2021.day06
-  (:require [clojure.string :as str]))
-
-(defn text->int [line]
-  (map #(Integer/parseInt %) (str/split line #",")))
-
+  (:require [clojure.string :as str]
+            [advent-of-code-2021.util :as util]))
 
 (defn process-input [input]
   (loop [i input
@@ -50,13 +47,13 @@
   (let [content (slurp "resources/day06.txt")]
     (-> content
         str/trim
-        text->int
+        util/text->int
         (process-n-generations 80)
         count
         println)
     (-> content
         str/trim
-        text->int
+        util/text->int
         (process-large-generations 256)
         total-values
         println)))
