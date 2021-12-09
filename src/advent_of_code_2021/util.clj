@@ -13,8 +13,10 @@
 
 (defn text->int
   "Converts a line of comma-separated numbers into a list of integers."
-  [line]
-  (map to-int (str/split (str/trim line) #",")))
+  ([line]
+   (map to-int (str/split (str/trim line) #",")))
+  ([line sep]
+   (map to-int (str/split (str/trim line) sep))))
 
 (defn abs [i]
   (if (neg? i) (- i) i))
