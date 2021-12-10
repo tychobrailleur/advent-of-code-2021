@@ -20,3 +20,8 @@
 
 (defn abs [i]
   (if (neg? i) (- i) i))
+
+(defn vec-contains?
+  "Returns true if vector V contains element ELT."
+  [v elt]
+  (some #(= elt %) v))

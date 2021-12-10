@@ -1,8 +1,6 @@
 (ns advent-of-code-2021.day08
-  (:require [clojure.string :as str]))
-
-(defn vec-contains? [v elt]
-  (some #(= elt %) v))
+  (:require [clojure.string :as str]
+            [advent-of-code-2021.util :as util]))
 
 (defn parse-line [line]
   (let [[digits code] (str/split line #"\|")
@@ -10,7 +8,7 @@
     code-digits))
 
 (defn count-uniques [code-digits]
-  (count (filter #(vec-contains? [2 3 4 7] (count %)) code-digits)))
+  (count (filter #(util/vec-contains? [2 3 4 7] (count %)) code-digits)))
 
 (defn find-all-strings-of-length [digits length]
   (filter #(= (count %) length) digits))
