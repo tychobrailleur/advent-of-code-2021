@@ -25,3 +25,9 @@
   "Returns true if vector V contains element ELT."
   [v elt]
   (some #(= elt %) v))
+
+(defn tee
+  "Prints N along with a specific messsage, and returns N, for using in threading."
+  [n msg]
+  (println msg n)
+  n)
