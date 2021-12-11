@@ -17,10 +17,10 @@
 (defn build-grid [content border-val f]
   (let [lines (str/split content #"\n")
         height (count lines)
-        grid (map #(vec (map f (util/text->int % #""))) lines)
+        grid (map #(mapv f (util/text->int % #"")) lines)
         width (count (first grid))
         border (vec (replicate (+ 2 width) (f border-val)))]
-    (add-element-beg-end (vec (map #(add-element-beg-end % (f border-val)) grid)) border)))
+    (add-element-beg-end (mapv #(add-element-beg-end % (f border-val)) grid) border)))
 
 (defn display-grid [grid]
   (str/join "\n" (map #(str/join (filter (comp not neg?) (map :val %))) grid)))
@@ -33,11 +33,11 @@
   (let [[i j] entry
         i-deltas [-1 0 1]
         j-deltas [-1 0 1]]
-    (vec (filter #(not= (:val (elt-at grid %)) border-val)
-                 (for [di i-deltas
-                       dj j-deltas
-                       :when (and (not (and (= di 0) (= dj 0))))]
-                   (vector (+ i di) (+ j dj)))))))
+    (filterv #(not= (:val (elt-at grid %)) border-val)
+             (for [di i-deltas
+                   dj j-deltas
+                   :when (and (not (and (= di 0) (= dj 0))))]
+               (vector (+ i di) (+ j dj))))))
 
 (defn all-coords [grid]
   (for [i (range 1 (dec (height-grid grid)))
@@ -89,7 +89,6 @@
       (recur (fire-octopus g (first coords))
              (rest coords)))))
 
-
 (defn all-fired? [grid]
   (= (* (- (height-grid grid) 2) (- (width-grid grid) 2)) ;; minus 2, for the borders.
      (count (filter #(> (:val %) max-point) (apply concat grid)))))
@@ -114,13 +113,23 @@
         make-octopi-fire
         (count-fired-and-reset count state))))
 
+(defn build-entry [val]
+  (hash-map :val val :state :rest))
+
 (defn process [content n]
-  (let [grid (build-grid content border-value
-                         (fn [n] (hash-map :val n :state :rest)))]
+  (let [grid (build-grid content border-value build-entry)]
     (last (take (inc n) (iterate process-step [grid 0 {:step 0 :all-flashed -1}])))))
+
+(defn process-till-all-fired [content]
+  (let [grid (build-grid content border-value build-entry)]
+    (loop [output (process-step [grid 0 {:step 0 :all-flashed -1}])]
+      (let [s (:all-flashed (last output))]
+        (if (not (neg? s))
+          s
+          (recur (process-step output)))))))
 
 (defn -main [& args]
   (let [content (slurp "resources/day11.txt")]
     (println (second (process content 100))))
   (let [content (slurp "resources/day11.txt")]
-    (println (:all-flashed (last (process content 1000))))))
+    (println (process-till-all-fired content))))
