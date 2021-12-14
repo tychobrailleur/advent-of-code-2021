@@ -27,8 +27,8 @@
         (= dir "up")
         (move-submarine (rest commands)
                         (if with-aim
-                            (update-state state :aim (- (Integer/parseInt distance)))
-                            (update-state state :depth (- (Integer/parseInt distance))))
+                          (update-state state :aim (- (Integer/parseInt distance)))
+                          (update-state state :depth (- (Integer/parseInt distance))))
                         with-aim)))))
 
 

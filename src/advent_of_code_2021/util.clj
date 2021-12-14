@@ -31,3 +31,8 @@
   [n msg]
   (println msg n)
   n)
+
+(defn remove-every-nth-char
+  "Removes every Nth character in a string S."
+  [s n]
+  (str/join (keep-indexed (fn [idx elt] (when (or (= idx 0) (not (= 0 (mod idx n)))) elt)) s)))
