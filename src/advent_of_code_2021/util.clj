@@ -18,7 +18,9 @@
   ([line sep]
    (map to-int (str/split (str/trim line) sep))))
 
-(defn abs [i]
+(defn abs
+  "Returns the absolute value of I."
+  [i]
   (if (neg? i) (- i) i))
 
 (defn vec-contains?
@@ -36,3 +38,11 @@
   "Removes every Nth character in a string S."
   [s n]
   (str/join (keep-indexed (fn [idx elt] (when (or (= idx 0) (not (= 0 (mod idx n)))) elt)) s)))
+
+(defn manhattan-distance
+  "Manhattan distance between START and FINISH."
+  [start finish]
+  (let [[x1 y1] start
+        [x2 y2] finish]
+    (+ (abs (- x1 x2))
+       (abs (- y1 y2)))))
