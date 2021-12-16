@@ -81,7 +81,7 @@
               (dissoc :current)))
         (let [packet-state (parse-packet b {:packets [] :rest b})]
           (recur (packet-state :rest)
-                 (concat packets (packet-state :packets))
+                 (vec (concat packets (packet-state :packets)))
                  (inc packet-num)))))))
 
 (defn parse-operator-packet [bits state]
@@ -121,14 +121,29 @@
   (let [bits (hex->bits (parse-content code))]
     (parse-packet bits {:packets []})))
 
-
-
 (defn sum-versions [packets]
   (if (packets :packets)
-    (reduce (fn [acc packt] (+ acc (sum-versions packt))) (get packets :version 0) (packets :packets))
+    (reduce (fn [acc packt] (+ acc (sum-versions packt)))
+            (get packets :version 0) (packets :packets))
     (get packets :version 0)))
 
-
+(defn walk-tree [p]
+  (if (vector? p)
+    (map #(walk-tree %) p)
+    (if (contains? p :rest) ;; highest level packet needs to be unwrapped
+      (walk-tree (get p :packets))
+      (case (p :type-id)
+        0 (apply + (walk-tree (vec (get p :packets))))
+        1 (apply * (walk-tree (get p :packets)))
+        2 (apply min (walk-tree (get p :packets)))
+        3 (apply max (walk-tree (get p :packets)))
+        4 (p :value)
+        5 (if (> (first (walk-tree (get p :packets)))
+                 (walk-tree (second (get p :packets)))) 1 0)
+        6 (if (< (first (walk-tree (get p :packets)))
+                 (walk-tree (second (get p :packets)))) 1 0)
+        7 (if (= (first (walk-tree (get p :packets)))
+                 (walk-tree (second (get p :packets)))) 1 0)))))
 
 
 (comment
@@ -142,4 +157,20 @@
 
   (println (sum-versions (process-code "A0016C880162017C3686B18A3D4780")))
   (println (sum-versions (process-code (slurp "resources/day16.txt"))))
+
+
+  (println (walk-tree (process-code "C200B40A82")))
+  (println (walk-tree (process-code "04005AC33890")))
+  (println (walk-tree (process-code "880086C3E88112")))
+  (println (walk-tree (process-code "CE00C43D881120")))
+  (println (walk-tree (process-code "D8005AC2A8F0")))
+  (println (walk-tree (process-code "F600BC2D8F")))
+  (println (walk-tree (process-code "9C005AC2F8F0")))
+  (println (walk-tree (process-code "9C0141080250320F1802104A08")))
+
+  (println (walk-tree (process-code (slurp "resources/day16.txt"))))
   )
+
+(defn -main [& args]
+  (println (sum-versions (process-code (slurp "resources/day16.txt"))))
+  (println (first (walk-tree (process-code (slurp "resources/day16.txt"))))))
