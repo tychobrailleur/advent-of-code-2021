@@ -43,7 +43,6 @@
         width (inc (- max_x min_x))
         height (inc (- max_y min_y))
         offset_y (- max_y height)]
-
     (for [p_y (range 0 height)]
       (for [p_x (range 0 width)]
         (if (in-plot? plot [p_x (+ (- height p_y) offset_y)])
@@ -62,44 +61,53 @@
         root-2 (/ (+ (- 1) (Math/sqrt (delta 1 1 (- (* 2 min-x-target))))) 2)]
     (int (Math/ceil (max root-1 root-2)))))
 
-(defn find-velocity-for-max-y [target]
+(defn find-all-velocities-on-target [target]
   (let [[x_a y_a x_b y_b] target
-        velocities (for [vy (range 1 100) ;; arbitrary max vy, there should be a way
-                                           ;;to compute an optimal with Pythagorus.
-                         vx (range (find-min-vx0 x_a) x_b)]
+        velocities (for [vy (range -200 200) ;; arbitrary max vy, there should be a way
+                                             ;; to compute an optimal with Pythagorus.
+                         vx (range (find-min-vx0 x_a) (inc x_b))]
                      [vx vy])]
     (loop [velo velocities
-           on-target []
-           max-y 0
-           coord-max-y nil]
+           on-target []]
       (if (empty? velo)
-        coord-max-y
+        on-target
         (let [[vx0 vy0] (first velo)]
           (recur (rest velo)
                  ;; Loop for one initial velocity
-                 (let [outcome (loop [location (make-step [0 0 vx0 vy0])
-                                      highest-y 0]
+                 (let [outcome (loop [location (make-step [0 0 vx0 vy0])]
                                  (if (in-target? target location)
-                                   [vx0 vy0 highest-y] ;; if we are on target, we have a candidate
-                                   (if (and (= (last location) 0) ;; if vy == 0
-                                            (< (second location) max-y)) ;; and y below max-x, stop here.
-                                     nil
-                                     (if (not (overshot? target location)) ;; continue if we have not overshot
-                                       (recur (make-step location)
-                                              (if (> (second location) highest-y) (second location) highest-y))
-                                       nil))))]
+                                   [vx0 vy0]   ;; if we are on target, we have a candidate
+                                   (if (not (overshot? target location)) ;; continue if we have not overshot
+                                     (recur (make-step location))
+                                     nil)))]
                    (if outcome
                      (conj on-target outcome)
-                     on-target))
-                 (reduce max 0 (map #(last %) on-target))
-                 (first (filter #(= (last %) max-y) on-target))))))))
+                     on-target))))))))
+
+(defn find-point-where-higest [initial-point]
+  (let [[vx vy] initial-point
+        initial [0 0 vx vy]]
+    (loop [current-point initial]
+      (if (or (zero? (last current-point))
+              (neg? (last current-point)))
+        current-point
+        (recur (make-step current-point))))))
+
+
+(defn find-velocity-for-max-y [target]
+  (let [candidates (find-all-velocities-on-target target)]
+    (reduce #(max %1 (second (find-point-where-higest %2))) 0 candidates)))
+
 
 (defn display-plane [plane]
   (str/join "\n" (map (fn [row] (str/join row)) plane)))
 
 (defn -main [& args]
-  (println (last (find-velocity-for-max-y (create-target [[253 280] [-73 -46]])))))
+  (println (find-velocity-for-max-y (create-target [[253 280] [-73 -46]])))
+  (println (count (find-all-velocities-on-target (create-target [[253 280] [-73 -46]])))))
 
+
+;; experiments
 (comment
 
   (println (take 5 (iterate make-step [0 0 7 2])))
@@ -124,8 +132,14 @@
     (map (partial overshot? [20 -5 30 -10]) steps))
 
 
-
   (println (-> (->> [0 0 6 3]
+                    (iterate make-step)
+                    (take 11))
+               (build-plane target)
+               display-plane))
+
+
+  (spit "/tmp/output.txt" (-> (->> [0 0 30 -10]
                     (iterate make-step)
                     (take 11))
                (build-plane target)
