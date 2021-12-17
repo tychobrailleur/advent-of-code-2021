@@ -1,6 +1,6 @@
 (ns advent-of-code-2021.day05
   (:require [clojure.string :as str]
-            [advent-of-code-2021.util :refer [to-int]]))
+            [advent-of-code-2021.util :as util :refer [to-int]]))
 
 (defn in-line? [[start end]]
   (let [[x1 y1] start
@@ -39,12 +39,6 @@
     (map #(vector x1 %) (ints-in-range y1 y2))
     (map #(vector % y1) (ints-in-range x1 x2))))
 
-(defn move-towards-zero [i]
-  (cond
-    (= i 0) 0
-    (neg? i) (inc i)
-    :else (dec i)))
-
 (defn extended-points-in-range [[x1 y1] [x2 y2]]
   (let [delta-x (- x2 x1)
         delta-y (- y2 y1)]
@@ -54,8 +48,8 @@
       (if (and (= 0 dx) (= 0 dy)) ;; Always true because diagonals are 45 degrees
         (conj list-points (vector x1 y1))
         (recur (conj list-points (vector (+ dx x1) (+ dy y1)))
-               (move-towards-zero dx)
-               (move-towards-zero dy))))))
+               (util/move-towards-zero dx)
+               (util/move-towards-zero dy))))))
 
 (defn add-segment-to-grid [grid segment f]
   (let [[start end] segment

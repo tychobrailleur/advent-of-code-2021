@@ -23,6 +23,14 @@
   [i]
   (if (neg? i) (- i) i))
 
+(defn move-towards-zero
+  "Makes an integer I converge towards 0.  When it reaches 0, it remains constant."
+  [i]
+  (cond
+    (= i 0) 0
+    (neg? i) (inc i)
+    :else (dec i)))
+
 (defn vec-contains?
   "Returns true if vector V contains element ELT."
   [v elt]
