@@ -38,9 +38,12 @@
 
 (defn tee
   "Prints N along with a specific messsage, and returns N, for using in threading."
-  [n msg]
-  (println msg n)
-  n)
+  ([n msg]
+   (println msg n)
+   n)
+  ([n]
+   (println n)
+   n))
 
 (defn remove-every-nth-char
   "Removes every Nth character in a string S."

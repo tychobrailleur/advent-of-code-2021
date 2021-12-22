@@ -7,5 +7,6 @@
             :year 2021
             :key "gpl-3.0"}
   :dependencies [[org.clojure/clojure "1.10.3"]
-                 [org.clojure/data.priority-map "1.1.0"]]
+                 [org.clojure/data.priority-map "1.1.0"]
+                 [org.clojure/math.combinatorics "0.1.6"]]
   :repl-options {:init-ns advent-of-code-2021.core})
